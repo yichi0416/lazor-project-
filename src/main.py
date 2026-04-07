@@ -39,7 +39,8 @@ def main(bff_path, out_dir="outputs"):
     if solution is None:
         print("No solution found.")
     else:
-        out_path = os.path.join(out_dir, "solution.txt")
+        filename = os.path.splitext(os.path.basename(bff_path))[0]
+        out_path = os.path.join(out_dir, filename + "_solution.txt")
         write_solution_text(solution, out_path)
         print("Solution written to", out_path)
 
