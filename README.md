@@ -1,72 +1,58 @@
 # lazor-project-
 # Lazor Solver Project
 
-## Overview
-This project implements a solver for Lazor puzzles using Python.  
-The program reads a `.bff` file, constructs the puzzle board, places blocks using a search algorithm, and simulates laser paths to determine whether all target points are hit.
+Description
+This repository contains:
 
----
+run.py: command-line solver that reads puzzle files in BFF format, tries combinations of placements according to available inventory, and outputs solution grids.
+data/: example puzzle files (.bff)
+solution/: output solution files
+tests/: test cases
+Requirements
 
-## Features
-- Parse `.bff` puzzle files
-- Represent board and block placements
-- Backtracking / combination-based solver
-- Laser ray tracing simulation
-- Output solution to file
+Python 3.7+
+No external dependencies (uses only standard library modules)
+Installation
 
----
+Clone the repository: git clone <repo-url>
+Enter the directory: cd <repo-dir>
+Usage
+Single puzzle:
 
-## Project Structure
-src/
-├── main.py          # Entry point
-├── parser.py        # Reads and parses .bff files
-├── board.py         # Board and block representation
-├── ray.py           # Ray class
-├── tracer.py        # Laser simulation
-├── solver.py        # Solver logic
-├── solver_utils.py  # Solution checking
-├── output.py        # Write results to file
----
+run.py -i data/example.bff -o solution/example_solution.txt This parses the input, runs the solver, and writes the solution grid to the specified output file.
+Solve all puzzles in data/:
 
-## How It Works
+run.py --all This will iterate over all .bff files in data/ and write a corresponding *_sol.txt file in the same folder.
+Options
 
-1. **Parsing**
-   - The `.bff` file is read and converted into:
-     - Grid
-     - Available blocks (A, B, C)
-     - Laser sources
-     - Target points
+-i : input .bff file path
+-o : output file path for the solution grid
+--all : solve every .bff file found in the data directory
+--debug : print debug information and best partial solution if no full solution found
+Input format (BFF)
 
-2. **Board Setup**
-   - A `Board` object stores:
-     - Allowed block positions
-     - Current placements
-     - Laser and target information
+GRID START / GRID STOP: ASCII grid rows between these markers. Use characters for empty cells or pre-filled items.
+LASERS: list of lasers with coordinates and direction (format same as in examples)
+TARGETS: list of target coordinates
+INVENTORY: counts for A, B, C pieces (e.g., A=2, B=1, C=0) (Replace with exact syntax from your example .bff files; add a short example.)
+How the solver works (brief)
 
-3. **Solving**
-   - The solver generates combinations of block placements
-   - For each configuration:
-     - Blocks are placed on the board
-     - Laser paths are simulated
+Reads board, laser definitions, targets and inventory.
+Enumerates combinations of empty slots for placing A, B, and C devices according to inventory counts.
+For each placement, simulates laser rays across the board using reflection, blocking, and C-piece behavior to collect hit targets.
+Returns the first configuration that hits all targets; otherwise returns the best partial solution (if --debug is used prints best hit count).
+Output
 
-4. **Ray Tracing**
-   - Rays move in small steps
-   - Interactions:
-     - `A`: reflect
-     - `B`: absorb (stop)
-     - `C`: split into two rays
+Plain-text grid: same dimensions as input grid, with A/B/C placed where solution puts them. Each row is a line in the output file.
+Testing
 
-5. **Validation**
-   - A solution is valid if all target points are hit
+Tests are in the tests/ directory. Run them with your preferred test runner or inspect the example test cases.
+Contributing
 
----
+Fork the repository, make a branch, open a PR. Add tests for new features and document changes in the README.
+License
 
-## How to Run
+Add your license here (e.g., MIT). If you don’t want to include a license, state that all rights are reserved.
+Contact
 
-From the project root:
-
-```bash
-python -m src.main data/test.bff
-
-To run another specific test:
-python -m src.main data/"example test name".bff
+Add maintainer email or GitHub handle.
