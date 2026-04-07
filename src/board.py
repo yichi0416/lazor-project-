@@ -23,9 +23,14 @@ class Board:
                 if ch in ('o', 'O'):
                     self.cells[(r, c)] = None
                     self.allowed.append((r, c))
+
+                elif isinstance(ch,Block):
+                    self.cells[(r,c)] = ch
+                    
                 elif ch in ('A', 'B', 'C', 'F'):  # fixed letters (F treated as opaque fixed custom)
                     kind = ch
                     self.cells[(r, c)] = Block(kind=kind, fixed=True)
+                    
                 else:
                     # 'x' or '.' or other empty space: no block allowed here, represent as None but not allowed
                     self.cells[(r, c)] = None
