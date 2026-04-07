@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/z/env python3
 # Lazor Unified Solver - Batch Compatible Version (Final)
 # EN.540.635 Software Carpentry – 2026
 
