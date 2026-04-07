@@ -1,127 +1,54 @@
-
+import sys
 import os
-from .block import Block
-
-def read_bff(file_path):
-    """Read a .bff file and return contents."""
-
-    with open(file_path, 'r') as f:
-        lines = f.readlines()
-
-    # remove comments and empty lines
-    clean_lines = []
-    for line in lines:
-        line = line.strip()
-        if line and not line.startswith('#'):
-            clean_lines.append(line)
-
-    return clean_lines
-
-def parse_grid(lines):
-    """Extract the grid from lines."""
-
-    grid = []
-    inside_grid = False
-
-    for line in lines:
-        if line == "GRID START":
-            inside_grid = True
-            continue
-
-        if line == "GRID STOP":
-            inside_grid = False
-            continue
-
-        if inside_grid:
-            row = line.split()
-            new_row = []
-
-            for cell in row:
-                if cell in ["A", "B", "C"]:
-                    new_row.append(Block(kind=cell, fixed=True))
-                else:
-                    new_row.append(cell)
-
-            grid.append(new_row)
-
-    return grid
+from .parser import parse_bff
+from .board import Board
+from .solver import solve_bruteforce
+from .output import write_solution_text
 
 
-def parse_available_blocks(lines):
-    """Extract available block"""
+def main(bff_path, out_dir="outputs"):
+    """Run solver on one bff file."""
 
-    available_blocks = {"A": 0, "B": 0, "C": 0}
+    # check file exists
+    if not os.path.exists(bff_path):
+        print("File not found:", bff_path)
+        return
 
-    for line in lines:
-        parts = line.split()
-        if len(parts) == 2 and parts[0] in available_blocks:
-            available_blocks[parts[0]] = int(parts[1])
+    # read and parse file
+    data = parse_bff(bff_path)
 
-    return available_blocks
+    grid = data["grid"]
+    available_blocks = data["available_blocks"]
+    lasers = data["lasers"]
+    points = data["points"]
 
+    # create board object
+    board = Board(grid, available_blocks, lasers, points)
 
-def parse_lasers(lines):
-    """Extract lazor starting points and directions."""
+    # make output folder if needed
+    if not os.path.exists(out_dir):
+        os.makedirs(out_dir)
 
-    lasers = []
+    print("Parsed board:", board.rows, "x", board.cols)
+    print("Allowed positions:", len(board.allowed))
 
-    for line in lines:
-        parts = line.split()
-        if parts[0] == "L":
-            x = int(parts[1])
-            y = int(parts[2])
-            vx = int(parts[3])
-            vy = int(parts[4])
-            lasers.append((x, y, vx, vy))
+    # run solver
+    solution = solve_bruteforce(board)
 
-    return lasers
-
-
-def parse_points(lines):
-    """Extract target points."""
-
-    points = []
-
-    for line in lines:
-        parts = line.split()
-        if parts[0] == "P":
-            x = int(parts[1])
-            y = int(parts[2])
-            points.append((x, y))
-
-    return points
-
-
-def parse_bff(file_path):
-    """Read and parse one .bff file."""
-
-    lines = read_bff(file_path)
-
-    puzzle = {
-        "grid": parse_grid(lines),
-        "available_blocks": parse_available_blocks(lines),
-        "lasers": parse_lasers(lines),
-        "points": parse_points(lines)
-    }
-
-    return puzzle
+    # write result
+    if solution is None:
+        print("No solution found.")
+    else:
+        out_path = os.path.join(out_dir, "solution.txt")
+        write_solution_text(solution, out_path)
+        print("Solution written to", out_path)
 
 
 if __name__ == "__main__":
-    folder = "bff_files"
+    # get input file
+    if len(sys.argv) > 1:
+        bff = sys.argv[1]
+    else:
+        bff = "data/test.bff"
 
-    for filename in os.listdir(folder):
-        if filename.endswith(".bff"):
-            path = os.path.join(folder, filename)
-
-            print(f"\n===== Reading {filename} =====")
-
-            puzzle = parse_bff(path)
-
-            print("Grid:")
-            for row in puzzle["grid"]:
-                print(row)
-
-            print("Available Blocks:", puzzle["available_blocks"])
-            print("Lasers:", puzzle["lasers"])
-            print("Points:", puzzle["points"])
+    main(bff)
