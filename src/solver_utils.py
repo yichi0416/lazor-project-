@@ -20,6 +20,11 @@ def check_board_solution(board: Board) -> bool:
     for lx,ly,vx,vy in board.lasers:
         ray = Ray(lx, ly, vx, vy)
         _, hits = trace_ray(ray, board)
+
+        print("Laser:", (lx, ly, vx, vy))
+        print("Path:", path)
+        print("Hits:", hits)
+        
         for idx in hits:
             hit_mask[idx] = True
         if all(hit_mask):
