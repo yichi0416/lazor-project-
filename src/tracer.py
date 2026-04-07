@@ -18,7 +18,18 @@ def hit_point(x: float, y: float, points: List[Tuple[float, float]], eps: float 
             hits.append(idx)
     return hits
 
+def _reflect(ray, r, c):
+    """
+    Use the same reflection rule already used in the original tracer.
+    """
+    fx = ray.x - c
+    fy = ray.y - r
 
+    if abs(fx - 0.5) < abs(fy - 0.5):
+        ray.vx *= -1
+    else:
+        ray.vy *= -1
+        
 def trace_ray(ray: Ray, board: Board, max_steps: int = 2000):
     """
     Trace a single ray through the board.
@@ -30,7 +41,7 @@ def trace_ray(ray: Ray, board: Board, max_steps: int = 2000):
       - Block types:
         - 'B' opaque: stop ray.
         - 'A' reflect: flip vx or vy depending on approach (heuristic).
-        - 'C' refract: pass-through (no split) in this starter implementation.
+        - 'C' refract: continue straight and also generate one reflected ray.
     """
     path = []
     hits = []
@@ -57,24 +68,26 @@ def trace_ray(ray: Ray, board: Board, max_steps: int = 2000):
                 continue
             kind = b.kind
             if kind == 'B':
-                # opaque: stop
                 break
             if kind == 'A':
-                # reflection heuristic:
-                # determine which axis is dominant in approach by looking at fractional parts
-                # flip the velocity component that aligns with larger approach
-                # (This is a simplification; exact physics requires edge intersection.)
-                fx = x - c
-                fy = y - r
-                # decide flip based on which fractional part is closer to 0.5 (i.e., crossing an edge)
-                if abs(fx - 0.5) < abs(fy - 0.5):
-                    # more horizontal crossing => flip vx
-                    ray.vx *= -1
-                else:
-                    ray.vy *= -1
-                # continue after bounce
+                _reflect(ray, r, c)
                 continue
             if kind == 'C':
-                # refract: starter behavior = pass through (no change)
+                #original ray continues straight through
+                #create one reflected ray and trace it too
+                new_ray = Ray(ray.x, ray.y, ray.vx, ray.vy)
+                _reflect(new_ray, r, c)
+
+                extra_steps = max(1, max_steps // 2)
+                extra_path, extra_hits = trace_ray(new_ray, board, max_steps=extra_steps)
+
+                for p in extra_path:
+                    if p not in path:
+                        path.append(p)
+
+                for idx in extra_hits:
+                    if idx not in hits:
+                        hits.append(idx)
+
                 continue
     return path, hits
