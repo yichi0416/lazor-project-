@@ -57,11 +57,11 @@ def trace_ray(ray: Ray, board: Board, max_steps: int = 2000):
                     hits.append(idx)
             # Do not return immediately — allow multiple hits by same ray
         # check board bounds
-        if x < 0 or y < 0 or x >= board.cols or y >= board.rows:
+        if x < 0 or y < 0 or x > board.cols * 2 or y > board.rows * 2:
             break
         # check cell
-        r = int(y)
-        c = int(x)
+        r = int(y // 2)
+        c = int(x // 2)
         if (r, c) in board.cells:
             b = board.get_block(r, c)
             if b is None:
