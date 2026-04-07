@@ -1,6 +1,4 @@
-
 import os
-from .block import Block
 
 def read_bff(file_path):
     """Read a .bff file and return contents."""
@@ -16,6 +14,7 @@ def read_bff(file_path):
             clean_lines.append(line)
 
     return clean_lines
+
 
 def parse_grid(lines):
     """Extract the grid from lines."""
@@ -37,10 +36,7 @@ def parse_grid(lines):
             new_row = []
 
             for cell in row:
-                if cell in ["A", "B", "C"]:
-                    new_row.append(Block(kind=cell, fixed=True))
-                else:
-                    new_row.append(cell)
+                new_row.append(cell)
 
             grid.append(new_row)
 
