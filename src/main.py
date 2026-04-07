@@ -1,6 +1,6 @@
 
 import os
-from block import Block
+from .block import Block
 
 def read_bff(file_path):
     """Read a .bff file and return contents."""
